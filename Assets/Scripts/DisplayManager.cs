@@ -2,9 +2,11 @@
 using UnityEngine.UI;
 using System.Collections;
 
+
+//Показывает медленно затухающий текст 
 public class DisplayManager : MonoBehaviour
 {
-    public Text displayText;
+    public Text displayText; //Сам текст
     public float displayTime;
     public float fadeTime;
 

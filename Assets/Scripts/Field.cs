@@ -29,18 +29,19 @@ public class Field : MonoBehaviour
     private const float TIME_DEFAULT_TICK = 1f; //Период таймера в секундах (на первом уровне)
     private const float TIME_LEVEL = 15.99f; //Время каждого уровня
     //Размеры поля
-    private const int FIELD_HEIGHT = 26;
+    private const int FIELD_HEIGHT = 25;
     private const int FIELD_WIDTH = 14;
     //Координаты появления новых тетраминошек
     private const int NEW_TETRO_COORD_X = FIELD_WIDTH / 2;
-    private const int NEW_TETRO_COORD_Y = FIELD_HEIGHT - 2;
+    private const int NEW_TETRO_COORD_Y = FIELD_HEIGHT + 1;
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private static Field instance;
 
     private Preview preview; //Preview script
     private Data data; //Данные: очки, линии и т. д.
-    private Transform[,] grid = new Transform[FIELD_WIDTH, FIELD_HEIGHT]; //Сетка с ссылками на квадратики
+    //Сетка с ссылками на квадратики (+5 для самой длинной фигуры, которая только начинает падать и пока еще за пределами)
+    private Transform[,] grid = new Transform[FIELD_WIDTH, FIELD_HEIGHT + 5];
     private TetrominoType nextTetromino;
 
 
@@ -66,8 +67,7 @@ public class Field : MonoBehaviour
     public bool IsSingleCellInsideFieldArea(Vector3 position)
     {
         return
-            position.x >= 0 && position.x < FIELD_WIDTH
-            && position.y >= 0 && position.y < FIELD_HEIGHT;
+            position.x >= 0 && position.x < FIELD_WIDTH && position.y >= 0;
     }
 
     public bool IsSingleCellFilled(Vector3 position)
@@ -88,6 +88,7 @@ public class Field : MonoBehaviour
         data = Data.Instance();
         //DrawField();
         StartNewGame();
+        StartCoroutine(Timer());
     }
 
     private void Update()
@@ -102,25 +103,32 @@ public class Field : MonoBehaviour
     {
         data.CurrentLevelTime = TIME_LEVEL;
         data.CurrentLevel = 1;
+        data.FilledLinesCount = 0;
         data.CurrentScore = 0;
 
         InstantiateNewTetromino(GetNextTetrominoType());
         nextTetromino = GetNextTetrominoType();
         preview.ShowPreview(nextTetromino);
-        StartCoroutine(Timer());
     }
 
     private void FinishGame()
     {
-        DisplayManager.Instance().DisplayMessage("You lose!");
-        for (int i = 0; i < FIELD_WIDTH; i++)
-            for (int j = 0; j < FIELD_HEIGHT; j++)
+        for (int i = 0; i < grid.GetLength(0); i++)
+            for (int j = 0; j < grid.GetLength(1); j++)
                 if (grid[i, j] != null)
                 {
                     Destroy(grid[i, j].gameObject);
                     grid[i, j] = null;
                 }
         StartNewGame();
+        DisplayManager.Instance().DisplayMessage("You lose!");
+    }
+
+    private bool IsLost()
+    {
+        for (int i = 0; i < FIELD_WIDTH; i++)
+            if (grid[i, FIELD_HEIGHT - 1] != null) return true;
+        return false;
     }
 
     //на случай изменения размера поля
@@ -178,8 +186,8 @@ public class Field : MonoBehaviour
     {
         List<int> rows = tetromino.GetRows(); //Получаем строки, в которые упала фигура
         DropTetromino(tetromino);
-        rows.Sort();
-        if (rows[rows.Count - 1] >= FIELD_HEIGHT - 3)
+
+        if (IsLost())
         {
             FinishGame();
             return;

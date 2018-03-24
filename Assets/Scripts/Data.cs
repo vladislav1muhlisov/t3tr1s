@@ -18,10 +18,18 @@ public class Data : MonoBehaviour
     private float currentLevelTime;
     private int filledLinesCount;
 
+    private DisplayManager displayManager;
+
     private static Data instance;
 
     private const int POINTS_PER_LINE = 20;
     private const int POINTS_PER_LINE_BONUS = 10;
+    private const int MAX_LEVEL = 9;
+
+    private void Awake()
+    {
+        displayManager = DisplayManager.Instance();
+    }
 
     public static Data Instance()
     {
@@ -43,9 +51,14 @@ public class Data : MonoBehaviour
         set
         {
             if (value <= 0) currentLevel = 1;
-            else if (value >= 10) currentLevel = 9;
-            else currentLevel = value;
-            levelValueText.text = currentLevel.ToString(); //Пишем также на экране
+            else if (value > MAX_LEVEL) currentLevel = MAX_LEVEL;
+            else
+            {
+                if (currentLevel < value) displayManager.DisplayMessage("Level UP!");
+                else if (currentLevel > value) displayManager.DisplayMessage("Level DOWN!");
+                currentLevel = value;
+                levelValueText.text = currentLevel.ToString(); //Пишем также на экране
+            }
         }
     }
 
@@ -81,11 +94,11 @@ public class Data : MonoBehaviour
 
     public void AddScore(int rowsCount) //Прибавить очки за строки
     {
-        int score = POINTS_PER_LINE * rowsCount;
+        int score = POINTS_PER_LINE * rowsCount * CurrentLevel;
         if (rowsCount > 1)
         {
-            score += POINTS_PER_LINE_BONUS * (rowsCount - 1) * (rowsCount - 1);
-            DisplayManager.Instance().DisplayMessage("Bonus X" + rowsCount.ToString());
+            score += POINTS_PER_LINE_BONUS * (rowsCount - 1) * (rowsCount - 1) * CurrentLevel;
+            displayManager.DisplayMessage("Bonus X" + rowsCount.ToString());
         }
         CurrentScore += score;
     }
