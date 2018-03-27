@@ -22,9 +22,9 @@ public class Data : MonoBehaviour
 
     private static Data instance;
 
+    public const int MAX_LEVEL = 9;
     private const int POINTS_PER_LINE = 20;
     private const int POINTS_PER_LINE_BONUS = 10;
-    private const int MAX_LEVEL = 9;
 
     private void Awake()
     {
@@ -62,7 +62,7 @@ public class Data : MonoBehaviour
         }
     }
 
-    public float CurrentLevelTime
+    public float CurrentLevelTimer
     {
         get { return currentLevelTime; }
         set

@@ -19,15 +19,14 @@ public class Field : MonoBehaviour
     public GameObject T_Prefab;
     public GameObject Z_Prefab;
     public Transform previewLocation;
-
-    public Text testText;
+    public Transform minoesLocation;
     #endregion
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     private readonly int FIGURES_COUNT = System.Enum.GetNames(typeof(TetrominoType)).Length; //Общее число фигур
 
     private const float TIME_DEFAULT_TICK = 1f; //Период таймера в секундах (на первом уровне)
-    private const float TIME_LEVEL = 15.99f; //Время каждого уровня
+    private const float TIME_LEVEL = 25.99f; //Время каждого уровня
     //Размеры поля
     private const int FIELD_HEIGHT = 25;
     private const int FIELD_WIDTH = 14;
@@ -101,7 +100,7 @@ public class Field : MonoBehaviour
 
     private void StartNewGame()
     {
-        data.CurrentLevelTime = TIME_LEVEL;
+        data.CurrentLevelTimer = TIME_LEVEL;
         data.CurrentLevel = 1;
         data.FilledLinesCount = 0;
         data.CurrentScore = 0;
@@ -209,7 +208,7 @@ public class Field : MonoBehaviour
         foreach (Transform mino in tetromino.minoes)
         {
             grid[(int)Mathf.Round(mino.position.x), (int)Mathf.Round(mino.position.y)] = mino;
-            mino.parent = fieldObject.transform; //Делаем мино child'ами игрового поля
+            mino.parent = minoesLocation; //Делаем мино child'ами игрового поля
         }
         Destroy(tetromino.gameObject);
     }
@@ -244,19 +243,24 @@ public class Field : MonoBehaviour
         currentTimerValue = 0;
         while (true) //Бесконечный цикл
         {
-            data.CurrentLevelTime -= Time.deltaTime;
+            data.CurrentLevelTimer -= Time.deltaTime;
             currentTimerValue += Time.deltaTime;
-            if (currentTimerValue >= TIME_DEFAULT_TICK / data.CurrentLevel) //Тик таймера
+            if (currentTimerValue >= CurrentLevelDuration()) //Тик таймера
             {
                 currentTimerValue = 0;
-                if (data.CurrentLevelTime < 0) //Новый уровень
+                if (data.CurrentLevelTimer < 0) //Новый уровень
                 {
-                    data.CurrentLevelTime = TIME_LEVEL;
+                    data.CurrentLevelTimer = TIME_LEVEL;
                     data.CurrentLevel++;
                 }
                 TimerTick();
             }
             yield return null;
         }
+    }
+
+    private float CurrentLevelDuration()
+    {
+        return TIME_DEFAULT_TICK * (Data.MAX_LEVEL + 1 - data.CurrentLevel) / (Data.MAX_LEVEL + 1);
     }
 }

@@ -1,8 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public enum RotationType { full, half, noRotation }
+public enum Command { moveRight, moveLeft, moveDown, rotate }
 
 public class Tetromino : MonoBehaviour
 {
@@ -28,14 +30,16 @@ public class Tetromino : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
-            MoveRight();
-        if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
-            MoveLeft();
-        if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
-            MoveDown();
-        if (Input.GetKeyDown(KeyCode.Space))
-            Rotate();
+        if (Input.GetKeyDown(KeyCode.D)) StartCoroutine(KeyHolding.HoldingWithDelay(KeyCode.D, MoveRight));
+        if (Input.GetKeyDown(KeyCode.RightArrow)) StartCoroutine(KeyHolding.HoldingWithDelay(KeyCode.RightArrow, MoveRight));
+
+        if (Input.GetKeyDown(KeyCode.A)) StartCoroutine(KeyHolding.HoldingWithDelay(KeyCode.A, MoveLeft));
+        if (Input.GetKeyDown(KeyCode.LeftArrow)) StartCoroutine(KeyHolding.HoldingWithDelay(KeyCode.LeftArrow, MoveLeft));
+
+        if (Input.GetKeyDown(KeyCode.S)) StartCoroutine(KeyHolding.HoldingWithDelay(KeyCode.S, MoveDown));
+        if (Input.GetKeyDown(KeyCode.DownArrow)) StartCoroutine(KeyHolding.HoldingWithDelay(KeyCode.DownArrow, MoveDown));
+
+        if (Input.GetKeyDown(KeyCode.Space)) StartCoroutine(KeyHolding.HoldingWithDelay(KeyCode.Space, Rotate));
     }
 
     private void Awake()
@@ -44,11 +48,6 @@ public class Tetromino : MonoBehaviour
         foreach (Transform mino in transform) minoes.Add(mino); //Получить отдельные дочерние мино
         field = Field.Instance();
         field.TimerTick += MoveDown; //На каждый тик таймера смещать вниз
-    }
-
-    private void OnDestroy()
-    {
-        field.TimerTick -= MoveDown;
     }
 
     private bool IsPlaceFilled()
@@ -76,6 +75,7 @@ public class Tetromino : MonoBehaviour
         transform.position += new Vector3(0, -1, 0);
         if (IsPlaceFilled())
         {
+            field.TimerTick -= MoveDown; //Фигура приземлилась и не будет больше реагировать на таймер
             transform.position += new Vector3(0, 1, 0);
             LandedEvent(this);
         }
