@@ -1606,7 +1606,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LevelValueText: {fileID: 896524387}
   ScoreValueText: {fileID: 1117101822}
-  TimeValueText: {fileID: 1093098869}
+  TimeValueText: {fileID: 362834829}
   LinesValueText: {fileID: 900130547}
 --- !u!114 &2051081081
 MonoBehaviour:
