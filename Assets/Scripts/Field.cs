@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Assets.Scripts;
 using UnityEngine;
-using UnityEngine.UI;
 
 
 public enum TetrominoType { I, J, L, O, S, T, Z } //Виды тетраминошек
@@ -10,55 +10,54 @@ public enum TetrominoType { I, J, L, O, S, T, Z } //Виды тетрамино�
 public class Field : MonoBehaviour
 {
     #region References
-    public GameObject fieldObject;
-    public GameObject I_Prefab;
-    public GameObject J_Prefab;
-    public GameObject L_Prefab;
-    public GameObject O_Prefab;
-    public GameObject S_Prefab;
-    public GameObject T_Prefab;
-    public GameObject Z_Prefab;
+    public GameObject PrefabI;
+    public GameObject PrefabJ;
+    public GameObject PrefabL;
+    public GameObject PrefabO;
+    public GameObject PrefabS;
+    public GameObject PrefabT;
+    public GameObject PrefabZ;
     public Transform previewLocation;
     public Transform minoesLocation;
     #endregion
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private readonly int FIGURES_COUNT = System.Enum.GetNames(typeof(TetrominoType)).Length; //Общее число фигур
+    private static readonly int m_figuresCount = System.Enum.GetNames(typeof(TetrominoType)).Length;
 
-    private const float TIME_DEFAULT_TICK = 1f; //Период таймера в секундах (на первом уровне)
-    private const float TIME_LEVEL = 25.99f; //Время каждого уровня
+    private const float TimeDefaultTick = 1f; //Период таймера в секундах (на первом уровне)
+    private const float TimeLevel = 25.99f; //Время каждого уровня
     //Размеры поля
-    private const int FIELD_HEIGHT = 25;
-    private const int FIELD_WIDTH = 14;
+    private const int FieldHeight = 25;
+    private const int FieldWidth = 14;
     //Координаты появления новых тетраминошек
-    private const int NEW_TETRO_COORD_X = FIELD_WIDTH / 2;
-    private const int NEW_TETRO_COORD_Y = FIELD_HEIGHT + 1;
+    private const int NewTetroCoordX = FieldWidth / 2;
+    private const int NewTetroCoordY = FieldHeight + 1;
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private static Field instance;
+    private static Field m_instance;
 
-    private Preview preview; //Preview script
-    private Data data; //Данные: очки, линии и т. д.
+    private Preview m_preview; //Preview script
+    private Data m_data; //Данные: очки, линии и т. д.
     //Сетка с ссылками на квадратики (+5 для самой длинной фигуры, которая только начинает падать и пока еще за пределами)
-    private Transform[,] grid = new Transform[FIELD_WIDTH, FIELD_HEIGHT + 5];
-    private TetrominoType nextTetromino;
+    private readonly Transform[,] m_grid = new Transform[FieldWidth, FieldHeight + 5];
+    private TetrominoType m_nextTetromino;
 
 
     public static Field Instance()
     {
-        if (!instance)
+        if (!m_instance)
         {
-            instance = FindObjectOfType<Field>();
-            if (!instance)
+            m_instance = FindObjectOfType<Field>();
+            if (!m_instance)
             {
                 Debug.LogError("There is no field object on the scene!");
                 return null;
             }
         }
-        return instance;
+        return m_instance;
     }
 
-    public Vector3 RoundPosition(Vector3 pos)
+    public static Vector3 RoundPosition(Vector3 pos)
     {
         return new Vector3((int)Mathf.Round(pos.x), (int)Mathf.Round(pos.y));
     }
@@ -66,14 +65,14 @@ public class Field : MonoBehaviour
     public bool IsSingleCellInsideFieldArea(Vector3 position)
     {
         return
-            position.x >= 0 && position.x < FIELD_WIDTH && position.y >= 0;
+            position.x >= 0 && position.x < FieldWidth && position.y >= 0;
     }
 
-    public bool IsSingleCellFilled(Vector3 position)
+    public bool IsSingleCellValid(Vector3 position)
     {
-        return
-            !IsSingleCellInsideFieldArea(position)
-            || grid[(int)position.x, (int)position.y] != null;
+        if (!IsSingleCellInsideFieldArea(position))
+            return false;
+        else return m_grid[(int)position.x, (int)position.y] == null;
     }
 
     //Событие переключения таймера
@@ -83,8 +82,8 @@ public class Field : MonoBehaviour
 
     private void Start()
     {
-        preview = previewLocation.GetComponent<Preview>();
-        data = Data.Instance();
+        m_preview = previewLocation.GetComponent<Preview>();
+        m_data = Data.Instance();
         //DrawField();
         StartNewGame();
         StartCoroutine(Timer());
@@ -93,31 +92,31 @@ public class Field : MonoBehaviour
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Equals) || Input.GetKeyDown(KeyCode.KeypadPlus))
-            data.CurrentLevel++;
+            m_data.CurrentLevel++;
         if (Input.GetKeyDown(KeyCode.Minus) || Input.GetKeyDown(KeyCode.KeypadMinus))
-            data.CurrentLevel--;
+            m_data.CurrentLevel--;
     }
 
     private void StartNewGame()
     {
-        data.CurrentLevelTimer = TIME_LEVEL;
-        data.CurrentLevel = 1;
-        data.FilledLinesCount = 0;
-        data.CurrentScore = 0;
+        m_data.CurrentLevelTimer = TimeLevel;
+        m_data.CurrentLevel = 1;
+        m_data.FilledLinesCount = 0;
+        m_data.CurrentScore = 0;
 
         InstantiateNewTetromino(GetNextTetrominoType());
-        nextTetromino = GetNextTetrominoType();
-        preview.ShowPreview(nextTetromino);
+        m_nextTetromino = GetNextTetrominoType();
+        m_preview.ShowPreview(m_nextTetromino);
     }
 
     private void FinishGame()
     {
-        for (int i = 0; i < grid.GetLength(0); i++)
-            for (int j = 0; j < grid.GetLength(1); j++)
-                if (grid[i, j] != null)
+        for (int i = 0; i < m_grid.GetLength(0); i++)
+            for (int j = 0; j < m_grid.GetLength(1); j++)
+                if (m_grid[i, j] != null)
                 {
-                    Destroy(grid[i, j].gameObject);
-                    grid[i, j] = null;
+                    Destroy(m_grid[i, j].gameObject);
+                    m_grid[i, j] = null;
                 }
         StartNewGame();
         DisplayManager.Instance().DisplayMessage("You lose!");
@@ -125,8 +124,8 @@ public class Field : MonoBehaviour
 
     private bool IsLost()
     {
-        for (int i = 0; i < FIELD_WIDTH; i++)
-            if (grid[i, FIELD_HEIGHT - 1] != null) return true;
+        for (int i = 0; i < FieldWidth; i++)
+            if (m_grid[i, FieldHeight - 1] != null) return true;
         return false;
     }
 
@@ -136,8 +135,8 @@ public class Field : MonoBehaviour
     //Заполнена ли строка
     private bool IsRowFilled(int row)
     {
-        for (int i = 0; i < FIELD_WIDTH; i++)
-            if (grid[i, row] == null)
+        for (int i = 0; i < FieldWidth; i++)
+            if (m_grid[i, row] == null)
                 return false;
         return true;
     }
@@ -145,21 +144,21 @@ public class Field : MonoBehaviour
     //Удалить строку
     private void DeleteRow(int row)
     {
-        for (int i = 0; i < FIELD_WIDTH; i++)
+        for (int i = 0; i < FieldWidth; i++)
         {
-            if (grid[i, row] != null)
+            if (m_grid[i, row] != null)
             {
-                Destroy(grid[i, row].gameObject);
-                grid[i, row] = null;
+                Destroy(m_grid[i, row].gameObject);
+                m_grid[i, row] = null;
             }
             //Смещаем вниз всё, что лежало выше
-            for (int j = row + 1; j < FIELD_HEIGHT; j++)
+            for (int j = row + 1; j < FieldHeight; j++)
             {
-                while (grid[i, j] != null)
+                while (m_grid[i, j] != null)
                 {
-                    grid[i, j - 1] = grid[i, j];
-                    grid[i, j] = null;
-                    grid[i, j - 1].position += new Vector3(0, -1);
+                    m_grid[i, j - 1] = m_grid[i, j];
+                    m_grid[i, j] = null;
+                    m_grid[i, j - 1].position += new Vector3(0, -1);
                 }
             }
         }
@@ -192,22 +191,22 @@ public class Field : MonoBehaviour
             return;
         }
 
-        InstantiateNewTetromino(nextTetromino);
-        nextTetromino = GetNextTetrominoType();
-        preview.ShowPreview(nextTetromino);
+        InstantiateNewTetromino(m_nextTetromino);
+        m_nextTetromino = GetNextTetrominoType();
+        m_preview.ShowPreview(m_nextTetromino);
 
         int filledRowsCount = CheckAndDeleteFilledRows(rows);
-        data.AddScore(filledRowsCount);
-        data.FilledLinesCount += filledRowsCount;
+        m_data.AddScore(filledRowsCount);
+        m_data.FilledLinesCount += filledRowsCount;
 
     }
 
     //Перестаём управлять фигурой
     private void DropTetromino(Tetromino tetromino)
     {
-        foreach (Transform mino in tetromino.minoes)
+        foreach (Transform mino in tetromino.Minoes)
         {
-            grid[(int)Mathf.Round(mino.position.x), (int)Mathf.Round(mino.position.y)] = mino;
+            m_grid[(int)Mathf.Round(mino.position.x), (int)Mathf.Round(mino.position.y)] = mino;
             mino.parent = minoesLocation; //Делаем мино child'ами игрового поля
         }
         Destroy(tetromino.gameObject);
@@ -215,52 +214,55 @@ public class Field : MonoBehaviour
 
     private TetrominoType GetNextTetrominoType()
     {
-        return (TetrominoType)Random.Range(0, FIGURES_COUNT);
+        return (TetrominoType)Random.Range(0, m_figuresCount);
     }
 
     private void InstantiateNewTetromino(TetrominoType tetromino)
     {
-        GameObject newTetromino = null;
+        GameObject newTetromino;
         switch (tetromino)
         {
-            case TetrominoType.I: newTetromino = Instantiate(I_Prefab, transform); break;
-            case TetrominoType.J: newTetromino = Instantiate(J_Prefab, transform); break;
-            case TetrominoType.L: newTetromino = Instantiate(L_Prefab, transform); break;
-            case TetrominoType.O: newTetromino = Instantiate(O_Prefab, transform); break;
-            case TetrominoType.S: newTetromino = Instantiate(S_Prefab, transform); break;
-            case TetrominoType.T: newTetromino = Instantiate(T_Prefab, transform); break;
-            case TetrominoType.Z: newTetromino = Instantiate(Z_Prefab, transform); break;
+            case TetrominoType.I: newTetromino = Instantiate(PrefabI, transform); break;
+            case TetrominoType.J: newTetromino = Instantiate(PrefabJ, transform); break;
+            case TetrominoType.L: newTetromino = Instantiate(PrefabL, transform); break;
+            case TetrominoType.O: newTetromino = Instantiate(PrefabO, transform); break;
+            case TetrominoType.S: newTetromino = Instantiate(PrefabS, transform); break;
+            case TetrominoType.T: newTetromino = Instantiate(PrefabT, transform); break;
+            case TetrominoType.Z: newTetromino = Instantiate(PrefabZ, transform); break;
+            default: newTetromino = Instantiate(PrefabI, transform); break;
         }
-        newTetromino.transform.localPosition = new Vector3(NEW_TETRO_COORD_X, NEW_TETRO_COORD_Y);
+
+        newTetromino.transform.localPosition = new Vector3(NewTetroCoordX, NewTetroCoordY);
         newTetromino.GetComponent<Tetromino>().LandedEvent += OnTetrominoLandedReaction;
     }
 
 
-    private float currentTimerValue;
+    private float m_currentTimerValue;
 
-    IEnumerator Timer()
+    private IEnumerator Timer()
     {
-        currentTimerValue = 0;
+        m_currentTimerValue = 0;
         while (true) //Бесконечный цикл
         {
-            data.CurrentLevelTimer -= Time.deltaTime;
-            currentTimerValue += Time.deltaTime;
-            if (currentTimerValue >= CurrentLevelDuration()) //Тик таймера
+            m_data.CurrentLevelTimer -= Time.deltaTime;
+            m_currentTimerValue += Time.deltaTime;
+            if (m_currentTimerValue >= CurrentLevelDuration()) //Тик таймера
             {
-                currentTimerValue = 0;
-                if (data.CurrentLevelTimer < 0) //Новый уровень
+                m_currentTimerValue = 0;
+                if (m_data.CurrentLevelTimer < 0) //Новый уровень
                 {
-                    data.CurrentLevelTimer = TIME_LEVEL;
-                    data.CurrentLevel++;
+                    m_data.CurrentLevelTimer = TimeLevel;
+                    m_data.CurrentLevel++;
                 }
                 TimerTick();
             }
             yield return null;
         }
+        // ReSharper disable once IteratorNeverReturns
     }
 
     private float CurrentLevelDuration()
     {
-        return TIME_DEFAULT_TICK * (Data.MAX_LEVEL + 1 - data.CurrentLevel) / (Data.MAX_LEVEL + 1);
+        return TimeDefaultTick * (Data.MaxLevel + 1 - m_data.CurrentLevel) / (Data.MaxLevel + 1);
     }
 }

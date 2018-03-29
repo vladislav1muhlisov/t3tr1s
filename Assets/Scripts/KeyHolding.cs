@@ -1,12 +1,11 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
 public static class KeyHolding
 {
-    private const float HOLDING_DELAY = 0.4f; //Задержка при удержании клавиши
-    private const float HOLDING_PERIOD = 0.2f; //Период вызова метода
+    private const float HoldingDelay = 0.4f; //Задержка при удержании клавиши
+    private const float HoldingPeriod = 0.025f; //Период вызова метода
 
 
     /// <summary>
@@ -25,13 +24,13 @@ public static class KeyHolding
             if (!Input.GetKey(keyCode)) yield break; //Выйти из цикла, если клавиша больше не "залипает"
             holdingDelayTimer += Time.deltaTime;
 
-            if (holdingDelayTimer > HOLDING_DELAY)
+            if (holdingDelayTimer > HoldingDelay)
                 while (true) //Цикл самого удержания клавиши
                 {
                     if (!Input.GetKey(keyCode)) yield break;
                     holdingTimer += Time.deltaTime;
 
-                    if (holdingDelayTimer > HOLDING_PERIOD)
+                    if (holdingTimer > HoldingPeriod)
                     {
                         action();
                         holdingTimer = 0;

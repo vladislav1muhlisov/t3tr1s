@@ -171,8 +171,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01ebb3b1ae3aabf43bb79c7dfbd55955, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rotationType: 1
-  minoes: []
+  RotationType: 1
+  Minoes: []
 --- !u!212 &212163279137574156
 SpriteRenderer:
   m_ObjectHideFlags: 1

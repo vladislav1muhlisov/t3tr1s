@@ -10,20 +10,20 @@ public class DisplayManager : MonoBehaviour
     public float displayTime;
     public float fadeTime;
 
-    private IEnumerator fadeAlpha;
+    private IEnumerator m_fadeAlpha;
 
-    private static DisplayManager displayManager;
+    private static DisplayManager m_displayManager;
 
     public static DisplayManager Instance()
     {
-        if (!displayManager)
+        if (!m_displayManager)
         {
-            displayManager = FindObjectOfType(typeof(DisplayManager)) as DisplayManager;
-            if (!displayManager)
+            m_displayManager = FindObjectOfType(typeof(DisplayManager)) as DisplayManager;
+            if (!m_displayManager)
                 Debug.LogError("There needs to be one active DisplayManager script on a GameObject in your scene.");
         }
 
-        return displayManager;
+        return m_displayManager;
     }
 
     public void DisplayMessage(string message)
@@ -32,17 +32,17 @@ public class DisplayManager : MonoBehaviour
         SetAlpha();
     }
 
-    void SetAlpha()
+    private void SetAlpha()
     {
-        if (fadeAlpha != null)
+        if (m_fadeAlpha != null)
         {
-            StopCoroutine(fadeAlpha);
+            StopCoroutine(m_fadeAlpha);
         }
-        fadeAlpha = FadeAlpha();
-        StartCoroutine(fadeAlpha);
+        m_fadeAlpha = FadeAlpha();
+        StartCoroutine(m_fadeAlpha);
     }
 
-    IEnumerator FadeAlpha()
+    private IEnumerator FadeAlpha()
     {
         Color resetColor = displayText.color;
         resetColor.a = 1;

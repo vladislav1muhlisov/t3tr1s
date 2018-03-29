@@ -1,104 +1,102 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 
 public class Data : MonoBehaviour
 {
     #region References
-    public Text levelValueText;
-    public Text scoreValueText;
-    public Text timeValueText;
-    public Text linesValueText;
+    public Text LevelValueText;
+    public Text ScoreValueText;
+    public Text TimeValueText;
+    public Text LinesValueText;
     #endregion
 
-    private int currentLevel;
-    private int currentScore;
-    private float currentLevelTime;
-    private int filledLinesCount;
+    private int m_currentLevel;
+    private int m_currentScore;
+    private float m_currentLevelTime;
+    private int m_filledLinesCount;
 
-    private DisplayManager displayManager;
+    private DisplayManager m_displayManager;
 
-    private static Data instance;
+    private static Data m_instance;
 
-    public const int MAX_LEVEL = 9;
-    private const int POINTS_PER_LINE = 20;
-    private const int POINTS_PER_LINE_BONUS = 10;
+    public const int MaxLevel = 9;
+    private const int PointsPerLine = 20;
+    private const int PointsPerLineBonus = 10;
 
     private void Awake()
     {
-        displayManager = DisplayManager.Instance();
+        m_displayManager = DisplayManager.Instance();
     }
 
     public static Data Instance()
     {
-        if (!instance)
+        if (!m_instance)
         {
-            instance = FindObjectOfType<Data>();
-            if (!instance)
+            m_instance = FindObjectOfType<Data>();
+            if (!m_instance)
             {
                 Debug.LogError("There is no data object on the scene!");
                 return null;
             }
         }
-        return instance;
+        return m_instance;
     }
 
     public int CurrentLevel
     {
-        get { return currentLevel; }
+        get { return m_currentLevel; }
         set
         {
-            if (value <= 0) currentLevel = 1;
-            else if (value > MAX_LEVEL) currentLevel = MAX_LEVEL;
+            if (value <= 0) m_currentLevel = 1;
+            else if (value > MaxLevel) m_currentLevel = MaxLevel;
             else
             {
-                if (currentLevel < value) displayManager.DisplayMessage("Level UP!");
-                else if (currentLevel > value) displayManager.DisplayMessage("Level DOWN!");
-                currentLevel = value;
-                levelValueText.text = currentLevel.ToString(); //Пишем также на экране
+                if (m_currentLevel < value) m_displayManager.DisplayMessage("Level UP!");
+                else if (m_currentLevel > value) m_displayManager.DisplayMessage("Level DOWN!");
+                m_currentLevel = value;
+                LevelValueText.text = m_currentLevel.ToString(); //Пишем также на экране
             }
         }
     }
 
     public float CurrentLevelTimer
     {
-        get { return currentLevelTime; }
+        get { return m_currentLevelTime; }
         set
         {
-            currentLevelTime = value;
-            timeValueText.text = ((int)currentLevelTime).ToString(); //Пишем также на экране
+            m_currentLevelTime = value;
+            TimeValueText.text = ((int)m_currentLevelTime).ToString(); //Пишем также на экране
         }
     }
 
     public int CurrentScore
     {
-        get { return currentScore; }
+        get { return m_currentScore; }
         set
         {
-            currentScore = value;
-            scoreValueText.text = currentScore.ToString(); //Пишем также на экране
+            m_currentScore = value;
+            ScoreValueText.text = m_currentScore.ToString(); //Пишем также на экране
         }
     }
 
     public int FilledLinesCount
     {
-        get { return filledLinesCount; }
+        get { return m_filledLinesCount; }
         set
         {
-            filledLinesCount = value;
-            linesValueText.text = filledLinesCount.ToString(); //Пишем также на экране
+            m_filledLinesCount = value;
+            LinesValueText.text = m_filledLinesCount.ToString(); //Пишем также на экране
         }
     }
 
     public void AddScore(int rowsCount) //Прибавить очки за строки
     {
-        int score = POINTS_PER_LINE * rowsCount * CurrentLevel;
+        int score = PointsPerLine * rowsCount * CurrentLevel;
         if (rowsCount > 1)
         {
-            score += POINTS_PER_LINE_BONUS * (rowsCount - 1) * (rowsCount - 1) * CurrentLevel;
-            displayManager.DisplayMessage("Bonus X" + rowsCount.ToString());
+            score += PointsPerLineBonus * (rowsCount - 1) * (rowsCount - 1) * CurrentLevel;
+            m_displayManager.DisplayMessage("Bonus X" + rowsCount);
         }
         CurrentScore += score;
     }
