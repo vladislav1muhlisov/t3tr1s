@@ -1,8 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Assets.Scripts;
 using UnityEngine;
-
 
 public enum TetrominoType { I, J, L, O, S, T, Z } //Виды тетраминошек
 
@@ -17,8 +15,8 @@ public class Field : MonoBehaviour
     public GameObject PrefabS;
     public GameObject PrefabT;
     public GameObject PrefabZ;
-    public Transform previewLocation;
-    public Transform minoesLocation;
+    public Transform PreviewLocation;
+    public Transform MinoesLocation;
     #endregion
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -82,7 +80,7 @@ public class Field : MonoBehaviour
 
     private void Start()
     {
-        m_preview = previewLocation.GetComponent<Preview>();
+        m_preview = PreviewLocation.GetComponent<Preview>();
         m_data = Data.Instance();
         //DrawField();
         StartNewGame();
@@ -207,7 +205,7 @@ public class Field : MonoBehaviour
         foreach (Transform mino in tetromino.Minoes)
         {
             m_grid[(int)Mathf.Round(mino.position.x), (int)Mathf.Round(mino.position.y)] = mino;
-            mino.parent = minoesLocation; //Делаем мино child'ами игрового поля
+            mino.parent = MinoesLocation; //Делаем мино child'ами игрового поля
         }
         Destroy(tetromino.gameObject);
     }

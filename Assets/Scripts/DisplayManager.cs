@@ -2,13 +2,12 @@
 using UnityEngine.UI;
 using System.Collections;
 
-
 //Показывает медленно затухающий текст 
 public class DisplayManager : MonoBehaviour
 {
-    public Text displayText; //Сам текст
-    public float displayTime;
-    public float fadeTime;
+    public Text DisplayText; //Сам текст
+    public float DisplayTime;
+    public float FadeTime;
 
     private IEnumerator m_fadeAlpha;
 
@@ -28,7 +27,7 @@ public class DisplayManager : MonoBehaviour
 
     public void DisplayMessage(string message)
     {
-        displayText.text = message;
+        DisplayText.text = message;
         SetAlpha();
     }
 
@@ -44,17 +43,17 @@ public class DisplayManager : MonoBehaviour
 
     private IEnumerator FadeAlpha()
     {
-        Color resetColor = displayText.color;
+        Color resetColor = DisplayText.color;
         resetColor.a = 1;
-        displayText.color = resetColor;
+        DisplayText.color = resetColor;
 
-        yield return new WaitForSeconds(displayTime);
+        yield return new WaitForSeconds(DisplayTime);
 
-        while (displayText.color.a > 0)
+        while (DisplayText.color.a > 0)
         {
-            Color displayColor = displayText.color;
-            displayColor.a -= Time.deltaTime / fadeTime;
-            displayText.color = displayColor;
+            Color displayColor = DisplayText.color;
+            displayColor.a -= Time.deltaTime / FadeTime;
+            DisplayText.color = displayColor;
             yield return null;
         }
         yield return null;

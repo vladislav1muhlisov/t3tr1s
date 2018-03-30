@@ -563,9 +563,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 444295b20849b1346898d0348792a283, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  displayText: {fileID: 1442378884}
-  displayTime: 3
-  fadeTime: 1
+  DisplayText: {fileID: 1442378884}
+  DisplayTime: 3
+  FadeTime: 1
 --- !u!4 &522053935
 Transform:
   m_ObjectHideFlags: 0
@@ -1421,8 +1421,8 @@ MonoBehaviour:
   PrefabS: {fileID: 1859679795062322, guid: 1e1c41280b2077048980c57b7daf722b, type: 2}
   PrefabT: {fileID: 1605539245637024, guid: e2d3f08b68718974eaad2aba37073e5b, type: 2}
   PrefabZ: {fileID: 1298793857136050, guid: 8a87c27c764861e4b946986303e914c6, type: 2}
-  previewLocation: {fileID: 415127300}
-  minoesLocation: {fileID: 1653567453}
+  PreviewLocation: {fileID: 415127300}
+  MinoesLocation: {fileID: 1653567453}
 --- !u!1 &1442378882
 GameObject:
   m_ObjectHideFlags: 0
